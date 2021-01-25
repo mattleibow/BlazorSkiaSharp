@@ -1,18 +1,32 @@
 ﻿
-window.SumMethod = function (a, b) {
-    if (!window._progSum) {
-        window._progSum = Module.mono_bind_static_method("[ConsoleApp1] ConsoleApp1.Program:SumMethod");
-    }
+// hax
 
-    return window._progSum(a, b);
+window.oldCleanupInit = App.cleanupInit;
+window.onReadyCallback = undefined;
+App.cleanupInit = function () {
+    window.oldCleanupInit();
+    App.isReady = true;
+    if (window.onReadyCallback)
+        window.onReadyCallback();
 }
 
 window.refreshCanvas = function (data, canvasId, width, height) {
+    if (!App.isReady) {
+        window.onReadyCallback = function () {
+            window.refreshCanvas(data, canvasId, width, height);
+        };
+        return false;
+    } else {
+        window.onReadyCallback = undefined;
+    }
+
     if (!window._InvalidateCanvasMethod) {
         window._InvalidateCanvasMethod = Module.mono_bind_static_method("[ConsoleApp1] ConsoleApp1.Program:InvalidateCanvas");
     }
 
     window._InvalidateCanvasMethod(data, canvasId, width, height);
+
+    return true;
 }
 
 window.invalidateCanvas = function (pData, canvasId, width, height) {
